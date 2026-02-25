@@ -1,9 +1,16 @@
 function UserCard({ name, email }) {
-  // ดึงตัวอักษรแรกมาทำ avatar
   const initials = name
     .split(" ")
     .map((n) => n[0])
     .join("");
+
+  // ⭐ Level 2: เลือกสีตามตัวอักษรแรก
+  const getAvatarColor = () => {
+    const charCode = name.charCodeAt(0);
+    if (charCode % 3 === 0) return "#1e40af"; // น้ำเงิน
+    if (charCode % 3 === 1) return "#059669"; // เขียว
+    return "#7c3aed"; // ม่วง
+  };
 
   return (
     <div
@@ -22,7 +29,7 @@ function UserCard({ name, email }) {
         style={{
           width: "40px",
           height: "40px",
-          background: "#1e40af",
+          background: getAvatarColor(),
           color: "white",
           borderRadius: "50%",
           display: "flex",
@@ -41,5 +48,4 @@ function UserCard({ name, email }) {
     </div>
   );
 }
-
 export default UserCard;
