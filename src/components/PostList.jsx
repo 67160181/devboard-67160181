@@ -1,62 +1,14 @@
+import { useState } from "react";
 import PostCard from "./PostCard";
 
-// ⭐ Level 1: แสดงจำนวนโพสต์
-function PostCount({ count }) {
-  return (
-    <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "1rem" }}>
-      โพสต์ทั้งหมด: <strong>{count}</strong> รายการ
-    </p>
-  );
-}
+function PostList({ posts, favorites, onToggleFavorite }) {
+  const [search, setSearch] = useState("");
 
-// ⭐ Level 3: โครงร่างจำลองตอนโหลด
-function PostSkeleton() {
-  return (
-    <>
-      {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: "8px",
-            padding: "1rem",
-            marginBottom: "1rem",
-            background: "white",
-          }}
-        >
-          <div
-            style={{
-              height: "20px",
-              width: "60%",
-              background: "#e2e8f0",
-              borderRadius: "4px",
-              marginBottom: "10px",
-            }}
-          ></div>
-          <div
-            style={{
-              height: "14px",
-              width: "90%",
-              background: "#f1f5f9",
-              borderRadius: "4px",
-              marginBottom: "6px",
-            }}
-          ></div>
-          <div
-            style={{
-              height: "14px",
-              width: "40%",
-              background: "#f1f5f9",
-              borderRadius: "4px",
-            }}
-          ></div>
-        </div>
-      ))}
-    </>
+  // กรองโพสต์ตาม search
+  const filtered = posts.filter((post) =>
+    post.title.toLowerCase().includes(search.toLowerCase()),
   );
-}
 
-function PostList({ posts }) {
   return (
     <div>
       <h2
@@ -68,14 +20,41 @@ function PostList({ posts }) {
       >
         โพสต์ล่าสุด
       </h2>
-      <PostCount count={posts.length} />
-      {posts.length === 0 ? (
-        <PostSkeleton />
-      ) : (
-        posts.map((post) => (
-          <PostCard key={post.id} title={post.title} body={post.body} />
-        ))
+
+      {/* Search Input */}
+      <input
+        type="text"
+        placeholder="ค้นหาโพสต์..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "0.5rem 0.75rem",
+          border: "1px solid #cbd5e0",
+          borderRadius: "6px",
+          fontSize: "1rem",
+          marginBottom: "1rem",
+          boxSizing: "border-box",
+        }}
+      />
+
+      {/* ถ้าไม่พบโพสต์ */}
+      {filtered.length === 0 && (
+        <p style={{ color: "#718096", textAlign: "center", padding: "2rem" }}>
+          ไม่พบโพสต์ที่ค้นหา
+        </p>
       )}
+
+      {/* แสดงรายการโพสต์ */}
+      {filtered.map((post) => (
+        <PostCard
+          key={post.id}
+          title={post.title}
+          body={post.body}
+          isFavorite={favorites.includes(post.id)}
+          onToggleFavorite={() => onToggleFavorite(post.id)}
+        />
+      ))}
     </div>
   );
 }
