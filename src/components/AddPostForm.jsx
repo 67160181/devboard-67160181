@@ -4,6 +4,9 @@ function AddPostForm({ onAddPost }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
+  const MAX_TITLE = 100;
+  const isLowRemaining = MAX_TITLE - title.length < 10;
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!title.trim() || !body.trim()) return; // ป้องกันส่งว่าง
@@ -28,21 +31,35 @@ function AddPostForm({ onAddPost }) {
         เพิ่มโพสต์ใหม่
       </h3>
 
-      <input
-        type="text"
-        placeholder="หัวข้อโพสต์"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "0.5rem",
-          marginBottom: "0.5rem",
-          border: "1px solid #cbd5e0",
-          borderRadius: "4px",
-          fontSize: "1rem",
-          boxSizing: "border-box",
-        }}
-      />
+      <div style={{ position: "relative" }}>
+        <input
+          type="text"
+          placeholder="หัวข้อโพสต์"
+          value={title}
+          maxLength={MAX_TITLE}
+          onChange={(e) => setTitle(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            marginBottom: "0.2rem",
+            border: "1px solid #cbd5e0",
+            borderRadius: "4px",
+            fontSize: "1rem",
+            boxSizing: "border-box",
+          }}
+        />
+        {/* ⭐ ตัวนับตัวอักษร real-time */}
+        <div
+          style={{
+            textAlign: "right",
+            fontSize: "0.8rem",
+            color: isLowRemaining ? "#e53e3e" : "#718096",
+            marginBottom: "0.5rem",
+          }}
+        >
+          {title.length}/{MAX_TITLE}
+        </div>
+      </div>
 
       <textarea
         placeholder="เนื้อหาโพสต์"

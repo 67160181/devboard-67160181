@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import PostList from "./components/PostList";
 import UserCard from "./components/UserCard";
@@ -34,8 +34,30 @@ const USERS = [
 ];
 
 function App() {
-  const [posts, setPosts] = useState(INITIAL_POSTS);
-  const [favorites, setFavorites] = useState([]); // เก็บ id ที่ถูกใจ
+  // favorites
+  // ⭐ อ่านค่าจาก localStorage ตอนเริ่มต้น ถ้าไม่มีให้ใช้ []
+  const [favorites, setFavorites] = useState(() => {
+    // เก็บ id ที่ถูกใจ
+    const saved = localStorage.getItem("favorites");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // ⭐ บันทึกลง localStorage ทุกครั้งที่ favorites เปลี่ยนแปลง
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
+
+  // devboard_posts
+  // ⭐ อ่านค่าจาก localStorage ตอนเริ่มต้น ถ้าไม่มีโพสต์ใหม่เพิ่มเติม ให้ดึงค่าจาก INITIAL_POSTS มาใช้
+  const [posts, setPosts] = useState(() => {
+    const savedPosts = localStorage.getItem("devboard_posts");
+    return savedPosts ? JSON.parse(savedPosts) : INITIAL_POSTS;
+  });
+
+  // ⭐ บันทึกลง localStorage ทุกครั้งที่ devboard_posts เปลี่ยนแปลง
+  useEffect(() => {
+    localStorage.setItem("devboard_posts", JSON.stringify(posts));
+  }, [posts]);
 
   // Toggle ถูกใจ/ยกเลิก
   function handleToggleFavorite(postId) {
