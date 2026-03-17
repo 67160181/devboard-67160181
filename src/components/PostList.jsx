@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import PostCard from "./PostCard";
 import LoadingSpinner from "./LoadingSpinner";
+import useFetch from "./hooks/useFetch"; // ตรวจสอบ path ไฟล์ให้ถูกนะครับ
 
-// ⭐ Level 1: แสดงจำนวนโพสต์
 function PostCount({ count }) {
   return (
     <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "1rem" }}>
@@ -11,7 +11,6 @@ function PostCount({ count }) {
   );
 }
 
-// ⭐ Level 3: โครงร่างจำลองตอนโหลด
 function PostSkeleton() {
   return (
     <>
@@ -59,55 +58,38 @@ function PostSkeleton() {
 }
 
 function PostList({ favorites, onToggleFavorite }) {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState("desc"); // 'desc' คือใหม่สุดก่อน
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState("desc");
+  const postsPerPage = 10;
 
-  useEffect(() => {
-    async function fetchPosts() {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch("https://jsonplaceholder.typicode.com/posts");
-        if (!res.ok) throw new Error("ดึงข้อมูลไม่สำเร็จ");
-        const data = await res.json();
-        setPosts(data.slice(0, 20)); // เอาแค่ 20 รายการแรก
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchPosts();
-  }, []); // [] = ทำครั้งเดียวตอน component mount
+  const {
+    data: posts,
+    loading,
+    error,
+    refetch,
+  } = useFetch("https://jsonplaceholder.typicode.com/posts");
 
+  // 1. กรองข้อมูล (Search)
   const filtered = posts.filter((post) =>
     post.title.toLowerCase().includes(search.toLowerCase()),
   );
 
-  if (loading) return <LoadingSpinner />;
+  // 2. เรียงลำดับ (Sort)
+  const sortedPosts = [...filtered].sort((a, b) => {
+    return sortOrder === "desc" ? b.id - a.id : a.id - b.id;
+  });
 
+  // 3. แบ่งหน้า (Pagination) - ⭐ ต้องใช้ข้อมูลที่ Sort แล้วมาตัดแบ่ง
+  const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const currentPosts = sortedPosts.slice(startIndex, startIndex + postsPerPage);
+
+  if (loading) return <LoadingSpinner />;
   if (error)
     return (
-      <div
-        style={{
-          padding: "1.5rem",
-          background: "#fff5f5",
-          border: "1px solid #fc8181",
-          borderRadius: "8px",
-          color: "#c53030",
-        }}
-      >
-        เกิดข้อผิดพลาด: {error}
-      </div>
+      <div style={{ color: "red", padding: "1rem" }}>ข้อผิดพลาด: {error}</div>
     );
-
-  // ⭐ เรียงลำดับข้อมูล (Sort) ตาม id (สมมติว่า id มากกว่าคือโพสต์ใหม่กว่า)
-  const sortedPosts = [...filtered].sort((a, b) => {
-    return sortOrder === "desc" ? b.id - a.id : a.id - b.id; //
-  });
 
   return (
     <div>
@@ -116,6 +98,7 @@ function PostList({ favorites, onToggleFavorite }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: "1rem",
         }}
       >
         <h2
@@ -124,26 +107,48 @@ function PostList({ favorites, onToggleFavorite }) {
             borderBottom: "2px solid #1e40af",
             paddingBottom: "0.5rem",
             flex: 1,
+            margin: 0,
           }}
         >
           โพสต์ล่าสุด
         </h2>
 
-        {/* ⭐ ปุ่ม Sort */}
-        <button
-          onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-          style={{
-            background: "#edf2f7",
-            border: "1px solid #cbd5e0",
-            padding: "0.3rem 0.6rem",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "0.85rem",
-            color: "#1e40af",
-          }}
-        >
-          {sortOrder === "desc" ? "🔽 ใหม่สุดก่อน" : "🔼 เก่าสุดก่อน"}
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {/* ⭐ ระดับ 1: ปุ่มโหลดใหม่ */}
+          <button
+            onClick={() => {
+              setCurrentPage(1);
+              refetch();
+            }}
+            style={{
+              background: "#fff",
+              border: "1px solid #cbd5e0",
+              padding: "0.3rem 0.6rem",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              color: "#1e40af",
+            }}
+          >
+            🔄 โหลดใหม่
+          </button>
+
+          {/* ปุ่ม Sort */}
+          <button
+            onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+            style={{
+              background: "#edf2f7",
+              border: "1px solid #cbd5e0",
+              padding: "0.3rem 0.6rem",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              color: "#1e40af",
+            }}
+          >
+            {sortOrder === "desc" ? "🔽 ใหม่สุด" : "🔼 เก่าสุด"}
+          </button>
+        </div>
       </div>
 
       <PostCount count={posts.length} />
@@ -152,7 +157,10 @@ function PostList({ favorites, onToggleFavorite }) {
         type="text"
         placeholder="ค้นหาโพสต์..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }} // ค้นหาแล้วให้กลับไปหน้า 1
         style={{
           width: "100%",
           padding: "0.5rem 0.75rem",
@@ -164,13 +172,11 @@ function PostList({ favorites, onToggleFavorite }) {
         }}
       />
 
-      {/* เงื่อนไขเช็คว่ากำลังโหลด (ไม่มีโพสต์เลย) หรือไม่ */}
       {posts.length === 0 ? (
         <PostSkeleton />
       ) : (
         <>
-          {/* ถ้ามีโพสต์แต่หาไม่เจอ */}
-          {sortedPosts.length === 0 && (
+          {currentPosts.length === 0 && (
             <p
               style={{ color: "#718096", textAlign: "center", padding: "2rem" }}
             >
@@ -178,8 +184,8 @@ function PostList({ favorites, onToggleFavorite }) {
             </p>
           )}
 
-          {/* แสดงรายการโพสต์ที่กรองแล้ว */}
-          {sortedPosts.map((post) => (
+          {/* ⭐ แสดงรายการที่ตัดแบ่งหน้าแล้ว */}
+          {currentPosts.map((post) => (
             <PostCard
               key={post.id}
               post={post}
@@ -187,6 +193,45 @@ function PostList({ favorites, onToggleFavorite }) {
               onToggleFavorite={() => onToggleFavorite(post.id)}
             />
           ))}
+
+          {/* ⭐ ระดับ 2: ตัวควบคุมหน้า (Pagination) */}
+          {totalPages > 1 && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "1rem",
+                marginTop: "1rem",
+                paddingBottom: "2rem",
+              }}
+            >
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+                style={{
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                }}
+              >
+                ← ก่อนหน้า
+              </button>
+
+              <span style={{ fontSize: "0.9rem", color: "#4a5568" }}>
+                หน้า {currentPage} / {totalPages}
+              </span>
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+                style={{
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
+                }}
+              >
+                ถัดไป →
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

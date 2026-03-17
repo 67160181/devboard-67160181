@@ -1,28 +1,16 @@
-import { useState, useEffect } from "react";
+import useFetch from "./hooks/useFetch";
 import UserCard from "./UserCard";
 import LoadingSpinner from "./LoadingSpinner";
 
 function UserList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const res = await fetch("https://jsonplaceholder.typicode.com/users");
-        const data = await res.json();
-        setUsers(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUsers();
-  }, []);
+  const {
+    data: users,
+    loading,
+    error,
+  } = useFetch("https://jsonplaceholder.typicode.com/users");
 
   if (loading) return <LoadingSpinner />;
+  if (error) return <p>เกิดข้อผิดพลาด: {error}</p>;
 
   return (
     <div>
