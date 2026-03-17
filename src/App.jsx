@@ -1,37 +1,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import PostList from "./components/PostList";
-import UserCard from "./components/UserCard";
+import UserList from "./components/UserList";
 import AddPostForm from "./components/AddPostForm";
-
-const INITIAL_POSTS = [
-  {
-    id: 1,
-    title: "React คืออะไร?",
-    body: "React เป็น library สำหรับสร้าง UI ที่ทำให้ code อ่านง่ายและดูแลรักษาได้",
-  },
-  {
-    id: 2,
-    title: "ทำไมต้องใช้ Components?",
-    body: "Components ช่วยให้เราแบ่ง UI ออกเป็นชิ้นเล็ก ๆ ที่ reuse ได้",
-  },
-  {
-    id: 3,
-    title: "JSX คืออะไร?",
-    body: "JSX คือ syntax ที่ช่วยให้เราเขียน HTML ใน JavaScript ได้อย่างสะดวก",
-  },
-  {
-    id: 4,
-    title: "Props ทำงานอย่างไร?",
-    body: "Props คือ argument ที่ส่งให้ component เหมือนกับการส่งพารามิเตอร์ให้ฟังก์ชัน",
-  },
-];
-
-const USERS = [
-  { id: 1, name: "สมชาย ใจดี", email: "somchai@dev.com" },
-  { id: 2, name: "สมหญิง รักเรียน", email: "somying@dev.com" },
-  { id: 3, name: "วิชาญ โค้ดเก่ง", email: "wichan@dev.com" },
-];
 
 function App() {
   // favorites
@@ -47,17 +18,7 @@ function App() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   }, [favorites]);
 
-  // devboard_posts
-  // ⭐ อ่านค่าจาก localStorage ตอนเริ่มต้น ถ้าไม่มีโพสต์ใหม่เพิ่มเติม ให้ดึงค่าจาก INITIAL_POSTS มาใช้
-  const [posts, setPosts] = useState(() => {
-    const savedPosts = localStorage.getItem("devboard_posts");
-    return savedPosts ? JSON.parse(savedPosts) : INITIAL_POSTS;
-  });
-
-  // ⭐ บันทึกลง localStorage ทุกครั้งที่ devboard_posts เปลี่ยนแปลง
-  useEffect(() => {
-    localStorage.setItem("devboard_posts", JSON.stringify(posts));
-  }, [posts]);
+  const [posts, setPosts] = useState([]);
 
   // Toggle ถูกใจ/ยกเลิก
   function handleToggleFavorite(postId) {
@@ -105,18 +66,7 @@ function App() {
 
         {/* คอลัมน์ขวา */}
         <div>
-          <h2
-            style={{
-              color: "#2d3748",
-              borderBottom: "2px solid #1e40af",
-              paddingBottom: "0.5rem",
-            }}
-          >
-            สมาชิก
-          </h2>
-          {USERS.map((user) => (
-            <UserCard key={user.id} name={user.name} email={user.email} />
-          ))}
+          <UserList />
         </div>
       </div>
     </div>
