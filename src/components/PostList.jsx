@@ -2,6 +2,7 @@ import { useState } from "react";
 import PostCard from "./PostCard";
 import LoadingSpinner from "./LoadingSpinner";
 import useFetch from "./hooks/useFetch"; // ตรวจสอบ path ไฟล์ให้ถูกนะครับ
+import { useFavorites } from "../context/FavoritesContext";
 
 function PostCount({ count }) {
   return (
@@ -57,10 +58,11 @@ function PostSkeleton() {
   );
 }
 
-function PostList({ favorites, onToggleFavorite }) {
+function PostList({}) {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("desc");
+  const { favorites } = useFavorites();
   const postsPerPage = 10;
 
   const {
@@ -186,12 +188,7 @@ function PostList({ favorites, onToggleFavorite }) {
 
           {/* ⭐ แสดงรายการที่ตัดแบ่งหน้าแล้ว */}
           {currentPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              isFavorite={favorites.includes(post.id)}
-              onToggleFavorite={() => onToggleFavorite(post.id)}
-            />
+            <PostCard key={post.id} post={post} />
           ))}
 
           {/* ⭐ ระดับ 2: ตัวควบคุมหน้า (Pagination) */}
