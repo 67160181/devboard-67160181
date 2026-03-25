@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PostCard from "./PostCard";
 import LoadingSpinner from "./LoadingSpinner";
-import useFetch from "./hooks/useFetch"; // ตรวจสอบ path ไฟล์ให้ถูกนะครับ
+import useFetch from "./hooks/useFetch";
 import { useFavorites } from "../context/FavoritesContext";
 
 function PostCount({ count }) {
@@ -87,7 +87,7 @@ function PostList({}) {
   const startIndex = (currentPage - 1) * postsPerPage;
   const currentPosts = sortedPosts.slice(startIndex, startIndex + postsPerPage);
 
-  if (loading) return <LoadingSpinner />;
+  // if (loading) return <LoadingSpinner />;
   if (error)
     return (
       <div style={{ color: "red", padding: "1rem" }}>ข้อผิดพลาด: {error}</div>
@@ -174,7 +174,7 @@ function PostList({}) {
         }}
       />
 
-      {posts.length === 0 ? (
+      {loading ? (
         <PostSkeleton />
       ) : (
         <>
